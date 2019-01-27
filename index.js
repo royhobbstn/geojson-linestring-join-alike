@@ -2,7 +2,8 @@
 const joinAlike = function (geo, attrArray) {
 
   let filtered_trouble = filterTroubleFeatures(geo.features);
-  let features = addTempId(filtered_trouble);
+  let constrained = constrainAttributes(filtered_trouble, attrArray);
+  let features = addTempId(constrained);
 
   let combined = true;
 
@@ -44,14 +45,48 @@ const joinAlike = function (geo, attrArray) {
 
       // create new segment
 
-      // attributes to arbitrarily choose between = ID (higher)
+
       const ID = start_id > end_id ? start_id : end_id;
 
-      const properties = {
-        MPH: start.properties.MPH, STFIPS: start.properties.STFIPS, CTFIPS: start.properties.CTFIPS,
-        SIGN1: start.properties.SIGN1, SIGN2: start.properties.SIGN2, SIGN3: start.properties.SIGN3,
-        __tempId__: ID
-      };
+      // must-equal; just grab from `start`
+      const mustEquals = {};
+      attrArray
+        .filter( attr => {
+        return attr.compare === 'must-equal';
+      }).forEach( attr => {
+        mustEquals[attr.field] = start.properties[attr.field];
+      });
+
+      // keep-higher
+      const keepHigher = {};
+      attrArray
+        .filter( attr => {
+          return attr.compare === 'keep-higher';
+        }).forEach( attr => {
+        keepHigher[attr.field] = start.properties[attr.field] > end.properties[attr.field] ?
+          start.properties[attr.field] : end.properties[attr.field];
+      });
+
+      // keep-lower
+      const keepLower = {};
+      attrArray
+        .filter( attr => {
+          return attr.compare === 'keep-lower';
+        }).forEach( attr => {
+        keepLower[attr.field] = start.properties[attr.field] < end.properties[attr.field] ?
+          start.properties[attr.field] : end.properties[attr.field];
+      });
+
+      // calc-sum
+      const calcSum = {};
+      attrArray
+        .filter( attr => {
+          return attr.compare === 'calc-sum';
+        }).forEach( attr => {
+        calcSum[attr.field] = start.properties[attr.field] + end.properties[attr.field];
+      });
+
+      const properties = { __tempId__: ID, ...mustEquals, ...keepHigher, ...keepLower, ...calcSum};
 
       // carefully combine geojson
       const geometry = {
@@ -75,6 +110,20 @@ const joinAlike = function (geo, attrArray) {
 
   return features;
 };
+
+function constrainAttributes(features, attributes) {
+  return features.map(feature => {
+
+    const constrained = {};
+    attributes.forEach(attr => {
+      constrained[attr.field] = feature.properties[attr.field];
+    });
+
+    return Object.assign({}, feature, {properties: constrained});
+
+
+  })
+}
 
 function filterTroubleFeatures(features) {
   // there will be problems if we dont filter out self connecting linestrings
@@ -145,13 +194,21 @@ function createLegend(dual_valency_pts, features) {
 function attributeMatches(legend, attributes) {
   const matches = {};
 
+  // matching operation
   Object.keys(legend).forEach(key => {
-    const match = attributes.every(attr=> {
+
+    const match = attributes.filter(attr=> {
+      return attr.compare === 'must-equal';
+    }).every(attr=> {
+
+      // investigate why this happens
       if(!legend[key].line_starts_with || !legend[key].line_ends_with) {
         return false;
       }
-      return legend[key].line_starts_with.properties[attr] === legend[key].line_ends_with.properties[attr];
+
+      return legend[key].line_starts_with.properties[attr.field] === legend[key].line_ends_with.properties[attr.field];
     });
+
     if(match) {
       matches[key] = legend[key];
     }
