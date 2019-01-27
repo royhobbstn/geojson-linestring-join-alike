@@ -108,8 +108,20 @@ const joinAlike = function (geo, attrArray) {
     features = returnGeoToArray(geo_as_lookup);
   }
 
-  return features;
+  const without_id = removeProprietaryId(features);
+
+  return {
+    "type": "FeatureCollection",
+    "features": without_id
+  };
 };
+
+function removeProprietaryId(features) {
+  return features.map(feature => {
+    const {__tempId__ , ...remaining} = feature.properties;
+    return Object.assign({}, feature, {properties: remaining});
+  });
+}
 
 function constrainAttributes(features, attributes) {
   return features.map(feature => {
