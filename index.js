@@ -1,5 +1,5 @@
 
-exports.joinAlike = function (geo, attrArray) {
+const joinAlike = function (geo, attrArray) {
 
   let filtered_trouble = filterTroubleFeatures(geo.features);
   let features = addTempId(filtered_trouble);
@@ -184,3 +184,7 @@ function getValency(features) {
   });
   return valency;
 }
+
+exports.joinAlike = joinAlike;
+
+module.exports = joinAlike;

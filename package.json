@@ -1,0 +1,20 @@
+{
+  "name": "geojson-linestring-join-alike",
+  "version": "1.0.0",
+  "description": "Join GeoJSON LineStrings with alike attributes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/royhobbstn/geojson-linestring-join-alike.git"
+  },
+  "keywords": [],
+  "author": "Daniel Trone",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/royhobbstn/geojson-linestring-join-alike/issues"
+  },
+  "homepage": "https://github.com/royhobbstn/geojson-linestring-join-alike#readme"
+}
