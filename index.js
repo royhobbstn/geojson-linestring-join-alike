@@ -45,7 +45,6 @@ const joinAlike = function (geo, attrArray) {
 
       // create new segment
 
-
       const ID = start_id > end_id ? start_id : end_id;
 
       // must-equal; just grab from `start`
@@ -91,7 +90,7 @@ const joinAlike = function (geo, attrArray) {
       // carefully combine geojson
       const geometry = {
         type: 'LineString',
-        coordinates: [...end.geometry.coordinates, ...start.geometry.coordinates]
+        coordinates: [...end.geometry.coordinates, ...start.geometry.coordinates.slice(1)]
       };
 
       // create geojson feature
@@ -141,8 +140,8 @@ function filterTroubleFeatures(features) {
   // there will be problems if we dont filter out self connecting linestrings
   return features.filter(feature=> {
     const len = feature.geometry.coordinates.length;
-    return feature.geometry.coordinates[0][0] !== feature.geometry.coordinates[len-1][0] &&
-      feature.geometry.coordinates[0][1] !== feature.geometry.coordinates[len-1][1];
+    return !(feature.geometry.coordinates[0][0] === feature.geometry.coordinates[len-1][0] &&
+      feature.geometry.coordinates[0][1] === feature.geometry.coordinates[len-1][1]);
   });
 }
 
