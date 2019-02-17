@@ -1,6 +1,6 @@
 {
   "name": "geojson-linestring-join-alike",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Join GeoJSON LineStrings with alike attributes.",
   "main": "index.js",
   "scripts": {
