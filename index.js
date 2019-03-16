@@ -40,6 +40,11 @@ const joinAlike = function (geo, attrArray) {
         continue;
       }
 
+      // start == end  && end == start problem
+      if(isInfiniteLoop(start_id, end_id, geo_as_lookup)) {
+        continue;
+      }
+
       dont_touch_ids.push(start_id);
       dont_touch_ids.push(end_id);
 
@@ -114,6 +119,21 @@ const joinAlike = function (geo, attrArray) {
     "features": without_id
   };
 };
+
+function isInfiniteLoop(start_id, end_id, geo_as_lookup) {
+
+  const start_start_coord = geo_as_lookup[String(end_id)].geometry.coordinates[0];
+  const start_end_coord = geo_as_lookup[String(end_id)].geometry.coordinates[geo_as_lookup[String(end_id)].geometry.coordinates.length - 1];
+
+  const end_start_coord = geo_as_lookup[String(start_id)].geometry.coordinates[0];
+  const end_end_coord = geo_as_lookup[String(start_id)].geometry.coordinates[geo_as_lookup[String(start_id)].geometry.coordinates.length - 1];
+
+  if((JSON.stringify(start_start_coord) === JSON.stringify(end_end_coord)) && (JSON.stringify(start_end_coord) === JSON.stringify(end_start_coord))) {
+    return true;
+  }
+
+  return false;
+}
 
 function removeProprietaryId(features) {
   return features.map(feature => {
